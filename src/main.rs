@@ -42,24 +42,36 @@ fn main() {
                 1000.0,
                 Material::reflective(
                     RGB::new(0.2, 0.2, 0.8),
-                    1.0,
+                    0.6,
                 ),
             )),
+            // Left sphere
             Box::from(Sphere::new(
                 math::Vec3::new(-2.0, 0.0, 0.0),
                 1.0,
                 Material::diffuse(RGB::new(0.2, 1.0, 0.2))
             )),
+            // Center sphere
             Box::from(Sphere::new(
                 math::Vec3::new(0.0, 0.0, 0.0),
                 1.0,
                 Material::reflective(
                     RGB::new(1.0, 0.2, 0.2),
-                    0.9,
+                    1.0,
                 ),
             )),
+            // Right sphere
             Box::from(Sphere::new(
-                math::Vec3::new(-0.75, 0.0, -1.5),
+                math::Vec3::new(2.0, 0.0, 0.0),
+                1.0,
+                Material::reflective(
+                    RGB::new(1.0, 0.2, 1.0),
+                    0.8,
+                ),
+            )),
+            // Right sphere
+            Box::from(Sphere::new(
+                math::Vec3::new(-0.75, -0.5, -1.5),
                 0.5,
                 Material::transparent(
                     RGB::new(1.0, 1.0, 1.0),
@@ -71,11 +83,14 @@ fn main() {
         ],
         vec![
             Light::Hemi(light::Hemi::new(
-                math::Vec3::new(-1.0, -1.0, 1.0), 
-                RGB::new(0.5, 0.5, 0.5),
+                math::Vec3::new(-1.0, -1.0, 1.5), 
+                RGB::new(0.6, 0.6, 0.6),
             )),
         ],
     );
+
+    let mut iterator = 0;
+    let mut line = 0;
 
     ui::ui_main(|(w, h), pixels| {
         if scene.camera().width() != w as usize || scene.camera().height() != h as usize

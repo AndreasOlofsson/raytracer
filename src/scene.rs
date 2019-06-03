@@ -85,9 +85,20 @@ impl Scene
                 match light
                 {
                     Light::Hemi(hemi) => {
-                        if let None = self.hit(Ray::new(hit_point, -hemi.direction))
+                        if record.material.reflectivity != 1.0
                         {
-                            color += hemi.color * (-record.normal.dot(hemi.direction)).max(0.0) as f32; // TODO diffuse using reflectivity
+                            if let None = self.hit(Ray::new(hit_point, -hemi.direction))
+                            {
+                                let mut intensity = (-record.normal.dot(hemi.direction)).max(0.0) as f32;
+
+                                if record.material.reflectivity != 0.0
+                                {
+                                    intensity = intensity.powf(1.0 / (1.0 - record.material.reflectivity));
+                                    intensity *= (record.material.reflectivity - 2.0) / (record.material.reflectivity - 1.0);
+                                }
+
+                                color += hemi.color * intensity; // TODO diffuse using reflectivity
+                            }
                         }
                     },
                 }
