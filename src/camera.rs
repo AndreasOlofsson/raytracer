@@ -4,7 +4,6 @@ use crate::math::{
     Quaternion,
 };
 use crate::Ray;
-use crate::util::Canvas;
 
 #[derive(Debug)]
 pub struct Camera
@@ -49,6 +48,16 @@ impl Camera
         }
     }
 
+    pub fn width(&self) -> usize
+    {
+        self.width
+    }
+
+    pub fn height(&self) -> usize
+    {
+        self.height
+    }
+
     pub fn set_w_h(&mut self, w_h: (usize, usize))
     {
         self.width = w_h.0;
@@ -56,22 +65,30 @@ impl Camera
         self.aspect = w_h.0 as f64 / w_h.1 as f64;
     }
 
-    pub fn rays(&self) -> Canvas<Ray>
+    pub fn rays(&self) -> Vec<Ray>
     {
         let look_base  = self.rot * Vec3::new(0.0, 0.0, 1.0);
-        let look_right = self.rot * Vec3::new(self.tan_half_fov, 0.0, 0.0);
-        let look_down  = self.rot * Vec3::new(0.0, -self.tan_half_fov / self.aspect, 0.0);
+        let look_right = self.rot * Vec3::new(self.tan_half_fov * self.aspect, 0.0, 0.0);
+        let look_down  = self.rot * Vec3::new(0.0, -self.tan_half_fov, 0.0);
 
         let look_right_step = look_right / (self.width  - 1) as f64 * 2.0;
         let look_down_step  = look_down  / (self.height - 1) as f64 * 2.0;
 
         let upper_left = look_base - look_right - look_down;
 
-        Canvas::new(self.width, self.height, |(x, y)| {
-            Ray::new(
-                self.pos, 
-                upper_left + look_right_step * x as f64 + look_down_step * y as f64
-            )
-        })
+        let mut rays = Vec::with_capacity(self.width * self.height);
+
+        for y in 0..self.height
+        {
+            for x in 0..self.width
+            {
+                rays.push(Ray::new(
+                    self.pos,
+                    upper_left + look_right_step * x as f64 + look_down_step * y as f64
+                ));
+            }
+        }
+
+        rays
     }
 }

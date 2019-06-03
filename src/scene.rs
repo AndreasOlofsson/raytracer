@@ -29,18 +29,20 @@ impl Scene
 
     pub fn render(&self, pixels: &mut [u8])
     {
-        let colors = self.camera.rays().map(|ray| {
-            self.trace_ray(ray, 3)
-        });
+        let rays = self.camera.rays();
 
-        colors.for_each(|(x, y), color| {
-            let start = (x + y * colors.width()) * 3;
-            let color_u8 = color.as_u8();
+        for y in 0..self.camera.height()
+        {
+            for x in 0..self.camera.width()
+            {
+                let color = self.trace_ray(rays[x + y * self.camera.width()], 3).as_u8();
+                let start = (x + y * self.camera.width()) * 3;
 
-            pixels[start] = color_u8[0];
-            pixels[start+1] = color_u8[1];
-            pixels[start+2] = color_u8[2];
-        });
+                pixels[start + 0] = color[0];
+                pixels[start + 1] = color[1];
+                pixels[start + 2] = color[2];
+            }
+        }
     }
 
     fn trace_ray(&self, ray: Ray, rem_bounces: u32) -> RGB

@@ -8,7 +8,6 @@ mod camera;
 mod object;
 mod scene;
 mod material;
-mod util;
 mod color;
 mod math;
 

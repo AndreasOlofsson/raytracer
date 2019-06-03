@@ -3,7 +3,6 @@ mod winit_conv;
 mod debug_box;
 
 use conrod_core::{
-    color,
     widget,
     Widget,
     Positionable,
