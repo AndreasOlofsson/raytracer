@@ -40,10 +40,10 @@ fn main() {
             Box::from(Sphere::new(
                 math::Vec3::new(0.0, -1001.0, 0.0),
                 1000.0,
-                Material {
-                    color: RGB::new(0.2, 0.2, 0.8),
-                    reflectivity: 1.0
-                },
+                Material::reflective(
+                    RGB::new(0.2, 0.2, 0.8),
+                    1.0,
+                ),
             )),
             Box::from(Sphere::new(
                 math::Vec3::new(-2.0, 0.0, 0.0),
@@ -53,10 +53,20 @@ fn main() {
             Box::from(Sphere::new(
                 math::Vec3::new(0.0, 0.0, 0.0),
                 1.0,
-                Material {
-                    color: RGB::new(1.0, 0.2, 0.2),
-                    reflectivity: 0.9,
-                }
+                Material::reflective(
+                    RGB::new(1.0, 0.2, 0.2),
+                    0.9,
+                ),
+            )),
+            Box::from(Sphere::new(
+                math::Vec3::new(-0.75, 0.0, -1.5),
+                0.5,
+                Material::transparent(
+                    RGB::new(1.0, 1.0, 1.0),
+                    1.0,
+                    0.1,
+                    0.64,
+                ),
             )),
         ],
         vec![

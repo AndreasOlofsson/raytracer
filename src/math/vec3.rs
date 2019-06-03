@@ -110,7 +110,7 @@ impl Vec3
         let d = self.dot(normal);
         let k = 1.0 - eta * eta * (1.0 - d * d);
 
-        if k < 1.0
+        if k < 0.0
         {
             Vec3::zero()
         }

@@ -106,6 +106,16 @@ impl ops::Mul<f32> for RGB
     }
 }
 
+impl ops::MulAssign<f32> for RGB
+{
+    fn mul_assign(&mut self, other: f32)
+    {
+        self.r *= other;
+        self.g *= other;
+        self.b *= other;
+    }
+}
+
 impl ops::Mul<RGB> for RGB
 {
     type Output = RGB;
