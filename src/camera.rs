@@ -8,12 +8,12 @@ use crate::Ray;
 #[derive(Debug)]
 pub struct Camera
 {
-    pos: Vec3,
+    pub pos: Vec3,
     pub rot: Quaternion,
-    tan_half_fov: f64,
-    width: usize,
-    height: usize,
-    aspect: f64,
+    pub tan_half_fov: f64,
+    pub width: usize,
+    pub height: usize,
+    pub aspect: f64,
 }
 
 impl Camera
@@ -23,7 +23,7 @@ impl Camera
         Camera {
             pos,
             rot,
-            tan_half_fov: (fov * 0.5).tan(),
+            tan_half_fov: (fov.to_radians() * 0.5).tan(),
             width,
             height,
             aspect: width as f64 / height as f64
@@ -41,7 +41,7 @@ impl Camera
             rot: Quaternion::from_mat3(Mat3::from_col_vec3([
                 right, camera_up, forward,
             ])).normalized(),
-            tan_half_fov: (fov * 0.5).tan(),
+            tan_half_fov: (fov.to_radians() * 0.5).tan(),
             width,
             height,
             aspect: width as f64 / height as f64,

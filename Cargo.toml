@@ -11,3 +11,4 @@ conrod_winit = { version = "0.64.0" }
 glium = { version = "0.23" }
 find_folder = "0.3.0"
 winit = "0.18"
+rand = "0.6.5"

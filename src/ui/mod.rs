@@ -20,10 +20,10 @@ widget_ids! {
 }
 
 pub fn ui_main<F>(mut render: F)
-where F: FnMut((u32, u32), &mut [u8]) -> bool
+where F: FnMut((u32, u32), &mut [f32]) -> bool
 {
-    let mut width: u32 = 1280;
-    let mut height: u32 = 720;
+    let mut width: u32 = 640;
+    let mut height: u32 = 480;
 
     let window = glium::glutin::WindowBuilder::new()
         .with_title("Raytracer")
@@ -44,9 +44,9 @@ where F: FnMut((u32, u32), &mut [u8]) -> bool
 
     let mut renderer = conrod_glium::Renderer::new(&*display).unwrap();
 
-    let mut pixels: Vec<u8> = Vec::with_capacity((width * height * 3) as usize);
+    let mut pixels: Vec<f32> = Vec::with_capacity((width * height * 3) as usize);
 
-    pixels.extend(std::iter::repeat(128).take((width * height * 3) as usize));
+    pixels.extend(std::iter::repeat(0.5).take((width * height * 3) as usize));
 
     let mut raw_image = glium::texture::RawImage2d::from_raw_rgb_reversed(&pixels, (width, height));
     let mut texture = glium::texture::Texture2d::new(&display.0, raw_image).unwrap();
@@ -56,8 +56,12 @@ where F: FnMut((u32, u32), &mut [u8]) -> bool
     loop
     {
         let mut exit = false;
+        let mut pending_resize = None;
+        let mut handled_event = false;
 
         events_loop.poll_events(|event| {
+            handled_event = true;
+
             use glium::glutin::{
                 Event,
                 WindowEvent,
@@ -79,22 +83,7 @@ where F: FnMut((u32, u32), &mut [u8]) -> bool
                             ..
                         } => exit = true,
                         WindowEvent::Resized(size) => {
-                            width = size.width as u32;
-                            height = size.height as u32;
-
-                            let new_size = width as usize * height as usize * 3;
-
-                            if new_size > pixels.len()
-                            {
-                                pixels.extend(std::iter::repeat(0).take(new_size - pixels.len()));
-                            }
-                            else if new_size < pixels.len()
-                            {
-                                for _ in 0..(pixels.len() - new_size)
-                                {
-                                    pixels.pop();
-                                }
-                            }
+                            pending_resize = Some(size);
                         },
                         _ => (),
                     }
@@ -119,11 +108,25 @@ where F: FnMut((u32, u32), &mut [u8]) -> bool
             break;
         }
 
+        if let Some(size) = pending_resize
+        {
+            width = size.width as u32;
+            height = size.height as u32;
+
+            let new_size = width as usize * height as usize * 3;
+
+            pixels = vec![0.0; new_size];
+
+            pending_resize = None;
+        }
+
         if render((width, height), &mut pixels)
         {
             raw_image = glium::texture::RawImage2d::from_raw_rgb_reversed(&pixels, (width, height));
             texture = glium::texture::Texture2d::new(&display.0, raw_image).unwrap();
             image_map.replace(image, texture);
+
+            println!("drawing");
 
             {
                 let ui = &mut ui.set_widgets();
@@ -134,12 +137,14 @@ where F: FnMut((u32, u32), &mut [u8]) -> bool
                     .middle()
                     .set(ids.background, ui);
 
-                SettingsBox::new()
-                    .parent(ids.background)
-                    // .middle_of(ids.background)
-                    // .w_h(40.0, 40.0)
-                    .set(ids.settings_box, ui);
+                // SettingsBox::new()
+                //     .parent(ids.background)
+                //     // .middle_of(ids.background)
+                //     // .w_h(40.0, 40.0)
+                //     .set(ids.settings_box, ui);
             }
+
+            ui.needs_redraw();
 
             if let Some(primitives) = ui.draw_if_changed() {
                 renderer.fill(&*display, primitives, &image_map);

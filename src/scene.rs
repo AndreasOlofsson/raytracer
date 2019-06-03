@@ -1,24 +1,36 @@
 use crate::{
     Camera,
     Object,
+    Light,
     Ray,
     HitRecord,
     RGB,
+    math::Vec3,
 };
 
 pub struct Scene
 {
+    pub sky: RGB,
     pub camera: Camera,
     pub objects: Vec<Box<Object>>,
+    pub lights: Vec<Light>,
+    pub iteration: u32,
+    pub rng: rand::rngs::StdRng,
 }
 
 impl Scene
 {
-    pub fn new(camera: Camera, objects: Vec<Box<Object>>) -> Scene
+    pub fn new(sky: RGB, camera: Camera, objects: Vec<Box<Object>>, lights: Vec<Light>) -> Scene
     {
+        use rand::FromEntropy;
+
         Scene {
+            sky,
             camera,
             objects,
+            lights,
+            iteration: 0,
+            rng: rand::rngs::StdRng::from_entropy(),
         }
     }
 
@@ -27,37 +39,80 @@ impl Scene
         &mut self.camera
     }
 
-    pub fn render(&self, pixels: &mut [u8])
+    pub fn render(&mut self, pixels: &mut [f32])
     {
         let rays = self.camera.rays();
+
+        self.rng = rand::SeedableRng::seed_from_u64(self.iteration as u64);
 
         for y in 0..self.camera.height()
         {
             for x in 0..self.camera.width()
             {
-                let color = self.trace_ray(rays[x + y * self.camera.width()], 3).as_u8();
+                // TODO optimize blending
+                let color = self.trace_ray(rays[x + y * self.camera.width()], 3);
                 let start = (x + y * self.camera.width()) * 3;
 
-                pixels[start + 0] = color[0];
-                pixels[start + 1] = color[1];
-                pixels[start + 2] = color[2];
+                pixels[start + 0] = (pixels[start + 0] * self.iteration as f32 + color.r) / (self.iteration as f32 + 1.0);
+                pixels[start + 1] = (pixels[start + 1] * self.iteration as f32 + color.g) / (self.iteration as f32 + 1.0);
+                pixels[start + 2] = (pixels[start + 2] * self.iteration as f32 + color.b) / (self.iteration as f32 + 1.0);
             }
         }
+
+        self.iteration += 1;
     }
 
-    fn trace_ray(&self, ray: Ray, rem_bounces: u32) -> RGB
+    fn trace_ray(&mut self, ray: Ray, rem_bounces: u32) -> RGB
     {
-        if rem_bounces == 0
+        if rem_bounces <= 0
         {
-            RGB::black()
+            return RGB::black();
         }
-        else if let Some(record) = self.hit(ray)
+
+        if let Some(record) = self.hit(ray)
         {
-            record.material.color
+            let hit_point = ray.point_at_dist(record.offset);
+
+            let mut color = RGB::black();
+
+            for light in self.lights.iter()
+            {
+                match light
+                {
+                    Light::Hemi(hemi) => {
+                        if let None = self.hit(Ray::new(hit_point, -hemi.direction))
+                        {
+                            color += hemi.color * (-record.normal.dot(hemi.direction)).max(0.0) as f32; // TODO diffuse using reflectivity
+                        }
+                    },
+                }
+            }
+
+            if record.material.reflectivity == 1.0
+            {
+                color += self.trace_ray(ray.reflect_at(record.offset, record.normal), rem_bounces - 1);
+            }
+            else if record.material.reflectivity == 0.0
+            {
+                let dir = Vec3::random_half_sphere(&mut self.rng, record.normal);
+                // TODO reflectivity bias
+                color += self.trace_ray(Ray::new(hit_point, dir), rem_bounces - 1);
+            }
+            else
+            {
+                let diffuse = Vec3::random_half_sphere(&mut self.rng, record.normal);
+                let reflective = ray.dir.reflect(record.normal);
+
+                let dir = (diffuse * (1.0 - record.material.reflectivity as f64) + reflective * record.material.reflectivity as f64).normalized();
+
+                color += self.trace_ray(Ray::new(hit_point, dir), rem_bounces - 1);
+            }
+
+            color * record.material.color
         }
         else
         {
-            RGB::black()
+            self.sky
         }
     }
 

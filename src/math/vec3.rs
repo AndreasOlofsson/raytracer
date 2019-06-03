@@ -26,6 +26,46 @@ impl Vec3
         }
     }
 
+    /// Genrates a random vector uniformally distributed on a unit sphere.
+    pub fn random_unit(rng: &mut rand::rngs::StdRng) -> Vec3
+    {
+        use rand::Rng;
+
+        let theta = 2.0 * std::f64::consts::PI * rng.gen::<f64>();
+        let phi   = std::f64::consts::PI * rng.gen::<f64>();
+
+        let sin_phi = phi.sin();
+        let cos_phi = phi.cos();
+        let sin_theta = theta.sin();
+        let cos_theta = theta.cos();
+
+        Vec3 {
+            x: sin_phi * cos_theta,
+            y: sin_phi * sin_theta,
+            z: cos_phi,
+        }
+    }
+
+    /// Generates a random vector uniformally distributes on one half of a unit sphere.
+    pub fn random_half_sphere(rng: &mut rand::rngs::StdRng, normal: Vec3) -> Vec3
+    {
+        let sphere = Vec3::random_unit(rng);
+        let l = sphere.dot(normal);
+
+        if l < 0.0
+        {
+            -sphere
+        }
+        else if l > 0.0
+        {
+            sphere
+        }
+        else
+        {
+            Vec3::random_half_sphere(rng, normal)
+        }
+    }
+
     pub fn normalized(&self) -> Vec3
     {
         let length = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
@@ -133,6 +173,20 @@ impl ops::Div<f64> for Vec3
             x: self.x / other,
             y: self.y / other,
             z: self.z / other,
+        }
+    }
+}
+
+impl ops::Neg for Vec3
+{
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3
+    {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }

@@ -21,4 +21,12 @@ impl Ray
     {
         self.origin + self.dir * dist
     }
+
+    pub fn reflect_at(&self, dist: f64, normal: Vec3) -> Ray
+    {
+        Ray {
+            origin: self.point_at_dist(dist),
+            dir: self.dir.reflect(normal),
+        }
+    }
 }
