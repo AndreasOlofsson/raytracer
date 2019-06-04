@@ -82,11 +82,37 @@ impl Camera
         {
             for x in 0..self.width
             {
+                // TODO optimize
                 rays.push(Ray::new(
                     self.pos,
                     upper_left + look_right_step * x as f64 + look_down_step * y as f64
                 ));
             }
+        }
+
+        rays
+    }
+
+    pub fn line_rays(&self, y: usize) -> Vec<Ray>
+    {
+        let look_base  = self.rot * Vec3::new(0.0, 0.0, 1.0);
+        let look_right = self.rot * Vec3::new(self.tan_half_fov * self.aspect, 0.0, 0.0);
+        let look_down  = self.rot * Vec3::new(0.0, -self.tan_half_fov, 0.0);
+
+        let look_right_step = look_right / (self.width  - 1) as f64 * 2.0;
+        let look_down_step  = look_down  / (self.height - 1) as f64 * 2.0;
+
+        let upper_left = look_base - look_right - look_down;
+
+        let mut rays = Vec::with_capacity(self.width);
+
+        for x in 0..self.width
+        {
+            // TODO optimize
+            rays.push(Ray::new(
+                self.pos,
+                upper_left + look_right_step * x as f64 + look_down_step * y as f64
+            ));
         }
 
         rays

@@ -5,10 +5,11 @@ authors = ["Andreas Olofsson <ao@blazar.se>"]
 edition = "2018"
 
 [dependencies]
-conrod_core = { version = "0.64.0" }
-conrod_glium = { version = "0.64.0" }
-conrod_winit = { version = "0.64.0" }
-glium = { version = "0.23" }
-find_folder = "0.3.0"
-winit = "0.18"
+# conrod_core = { version = "0.64.0" }
+# conrod_glium = { version = "0.64.0" }
+# conrod_winit = { version = "0.64.0" }
+# glium = { version = "0.23" }
+# find_folder = "0.3.0"
+# winit = "0.18"
+glium = "0.25.0"
 rand = "0.6.5"

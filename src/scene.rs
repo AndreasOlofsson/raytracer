@@ -14,7 +14,6 @@ pub struct Scene
     pub camera: Camera,
     pub objects: Vec<Box<Object>>,
     pub lights: Vec<Light>,
-    pub iteration: u32,
     pub rng: rand::rngs::StdRng,
 }
 
@@ -29,7 +28,6 @@ impl Scene
             camera,
             objects,
             lights,
-            iteration: 0,
             rng: rand::rngs::StdRng::from_entropy(),
         }
     }
@@ -39,30 +37,30 @@ impl Scene
         &mut self.camera
     }
 
-    pub fn render(&mut self, pixels: &mut [f32])
-    {
-        let rays = self.camera.rays();
+    // pub fn render(&mut self, pixels: &mut [f32])
+    // {
+    //     let rays = self.camera.rays();
 
-        self.rng = rand::SeedableRng::seed_from_u64(self.iteration as u64);
+    //     self.rng = rand::SeedableRng::seed_from_u64(self.iteration as u64);
 
-        for y in 0..self.camera.height()
-        {
-            for x in 0..self.camera.width()
-            {
-                // TODO optimize blending
-                let color = self.trace_ray(rays[x + y * self.camera.width()], false, 6);
-                let start = (x + y * self.camera.width()) * 3;
+    //     for y in 0..self.camera.height()
+    //     {
+    //         for x in 0..self.camera.width()
+    //         {
+    //             // TODO optimize blending
+    //             let color = self.trace_ray(rays[x + y * self.camera.width()], false, 6);
+    //             let start = (x + y * self.camera.width()) * 3;
 
-                pixels[start + 0] = (pixels[start + 0] * self.iteration as f32 + color.r) / (self.iteration as f32 + 1.0);
-                pixels[start + 1] = (pixels[start + 1] * self.iteration as f32 + color.g) / (self.iteration as f32 + 1.0);
-                pixels[start + 2] = (pixels[start + 2] * self.iteration as f32 + color.b) / (self.iteration as f32 + 1.0);
-            }
-        }
+    //             pixels[start + 0] = (pixels[start + 0] * self.iteration as f32 + color.r) / (self.iteration as f32 + 1.0);
+    //             pixels[start + 1] = (pixels[start + 1] * self.iteration as f32 + color.g) / (self.iteration as f32 + 1.0);
+    //             pixels[start + 2] = (pixels[start + 2] * self.iteration as f32 + color.b) / (self.iteration as f32 + 1.0);
+    //         }
+    //     }
 
-        self.iteration += 1;
-    }
+    //     self.iteration += 1;
+    // }
 
-    fn trace_ray(&mut self, ray: Ray, inside: bool, rem_bounces: u32) -> RGB
+    pub fn trace_ray(&mut self, ray: Ray, inside: bool, rem_bounces: u32) -> RGB
     {
         if rem_bounces <= 0
         {

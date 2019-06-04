@@ -52,6 +52,15 @@ impl RGB
             (self.b * 255.0) as u8,
         ]
     }
+
+    pub fn gamma(&self, gamma: f32) -> RGB
+    {
+        RGB {
+            r: self.r.powf(gamma),
+            g: self.g.powf(gamma),
+            b: self.b.powf(gamma),
+        }
+    }
 }
 
 impl ops::Add for RGB

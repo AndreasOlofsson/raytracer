@@ -1,7 +1,7 @@
-#[macro_use]
-extern crate conrod_core;
-#[macro_use]
-extern crate conrod_winit;
+// #[macro_use]
+// extern crate conrod_core;
+// #[macro_use]
+// extern crate conrod_winit;
 
 mod ray;
 mod camera;
@@ -83,23 +83,46 @@ fn main() {
         ],
         vec![
             Light::Hemi(light::Hemi::new(
-                math::Vec3::new(-1.0, -1.0, 1.5), 
+                math::Vec3::new(-1.0, -1.0, 1.5),
                 RGB::new(0.6, 0.6, 0.6),
             )),
         ],
     );
 
-    let mut iterator = 0;
+    let mut iteration = 0;
     let mut line = 0;
 
     ui::ui_main(|(w, h), pixels| {
         if scene.camera().width() != w as usize || scene.camera().height() != h as usize
         {
             scene.camera().set_w_h((w as usize, h as usize));
-            scene.iteration = 0;
+            iteration = 0;
+            line = 0;
         }
 
-        scene.render(pixels);
+        for _ in 0..50
+        {
+            for (x, ray) in scene.camera().line_rays(line).into_iter().enumerate()
+            {
+                let color = scene.trace_ray(ray, false, 6);
+                let color = color.gamma(0.45);
+                let start = (x + line * w as usize) * 3;
+
+                pixels[start + 0] = (pixels[start + 0] * iteration as f32 + color.r) / (iteration as f32 + 1.0);
+                pixels[start + 1] = (pixels[start + 1] * iteration as f32 + color.g) / (iteration as f32 + 1.0);
+                pixels[start + 2] = (pixels[start + 2] * iteration as f32 + color.b) / (iteration as f32 + 1.0);
+            }
+
+            if line + 1 >= h as usize
+            {
+                line = 0;
+                iteration += 1;
+            }
+            else
+            {
+                line += 1;
+            }
+        }
 
         true
     });
