@@ -69,7 +69,7 @@ fn main() {
                     0.8,
                 ),
             )),
-            // Right sphere
+            // Front-left sphere
             Box::from(Sphere::new(
                 math::Vec3::new(-0.75, -0.5, -1.5),
                 0.5,
@@ -78,6 +78,17 @@ fn main() {
                     1.0,
                     0.1,
                     0.64,
+                ),
+            )),
+            // Front-right sphere
+            Box::from(Sphere::new(
+                math::Vec3::new(0.75, -0.5, -1.5),
+                0.5,
+                Material::transparent(
+                    RGB::new(1.0, 1.0, 1.0),
+                    0.95,
+                    0.05,
+                    0.3,
                 ),
             )),
         ],
@@ -104,7 +115,7 @@ fn main() {
         {
             for (x, ray) in scene.camera().line_rays(line).into_iter().enumerate()
             {
-                let color = scene.trace_ray(ray, false, 6);
+                let color = scene.trace_ray(ray, false, 10);
                 let color = color.gamma(0.45);
                 let start = (x + line * w as usize) * 3;
 

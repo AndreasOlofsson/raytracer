@@ -9,7 +9,7 @@ pub struct Material
     /// 
     /// 0.0 = completely diffuse
     /// 1.0 = completely reflective
-    pub reflectivity: f32,
+    pub reflectivity: f32, // TODO change to roughness
     /// Opacity
     pub opacity: f32,
     /// Refractive index
