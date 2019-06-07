@@ -105,19 +105,24 @@ impl Vec3
         *self - normal * (2.0 * self.dot(normal))
     }
 
-    pub fn refract(&self, normal: Vec3, eta: f64) -> Vec3
+    pub fn refract(&self, normal: Vec3, eta: f64) -> Option<Vec3>
     {
         let d = self.dot(normal);
         let k = 1.0 - eta * eta * (1.0 - d * d);
 
         if k < 0.0
         {
-            Vec3::zero()
+            None
         }
         else
         {
-            *self * eta - normal * (eta * d + k.sqrt())
+            Some(*self * eta - normal * (eta * d + k.sqrt()))
         }
+    }
+
+    pub fn is_zero(&self) -> bool
+    {
+        self.x == 0.0 || self.y == 0.0 || self.z == 0.0
     }
 }
 

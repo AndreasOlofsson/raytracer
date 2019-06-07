@@ -50,9 +50,11 @@ impl Scene
 
             if inside
             {
+                let dir = ray.dir.refract(-record.normal, 1.0 / record.material.r_index as f64).unwrap_or_else(|| ray.dir.reflect(-record.normal));
+
                 // TODO roughness on ray exit
                 // TODO total internal reflection
-                return self.trace_ray(Ray::new(hit_point, ray.dir.refract(-record.normal, 1.0 / record.material.r_index as f64)), false, rem_bounces);
+                return self.trace_ray(Ray::new(hit_point, dir), false, rem_bounces);
             }
 
             let mut color = RGB::black();
